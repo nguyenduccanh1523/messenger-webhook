@@ -44,29 +44,39 @@ let getWebhookCMS = (req, res) => {
 let postWebhookCMS = (req, res) => {
     const body = req.body;
 
-    // Kiểm tra nếu sự kiện đến từ một page subscription
     if (body.object === "page") {
         body.entry.forEach(function (entry) {
-            // Lấy PSID của người gửi
             const senderId = entry.messaging[0].sender.id;
-
-            // Lấy nội dung tin nhắn
             const message = entry.messaging[0].message.text;
+            let imageUrl = null;
+
+            // Check if the message contains attachments
+            if (entry.messaging[0].message.attachments) {
+                entry.messaging[0].message.attachments.forEach(attachment => {
+                    if (attachment.type === 'image') {
+                        imageUrl = attachment.payload.url;
+                    }
+                });
+            }
 
             console.log(`Sender ID: ${senderId}`);
             console.log(`Message: ${message}`);
+            if (imageUrl) {
+                console.log(`Image URL: ${imageUrl}`);
+            }
 
             messages.push({
                 senderId: senderId,
-                message: message
+                message: message,
+                imageUrl: imageUrl
             });
-            sendToN8n({senderId, message});
+
+            // Send the message and image URL to n8n
+            sendToN8n({ senderId, message, imageUrl });
         });
 
-        // Trả về trạng thái 200 OK
         res.status(200).send("EVENT_RECEIVED");
     } else {
-        // Nếu không phải từ page subscription
         res.sendStatus(404);
     }
 };
