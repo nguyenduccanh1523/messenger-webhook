@@ -43,13 +43,11 @@ let getWebhook = (req, res) => {
 
 let postWebhook = (req, res) => {
     const body = req.body;
-
     if (body.object === "page") {
         body.entry.forEach(function (entry) {
             const senderId = entry.messaging[0].sender.id;
             const message = entry.messaging[0].message.text;
             let imageUrl = null;
-
             // Check if the message contains attachments
             if (entry.messaging[0].message.attachments) {
                 entry.messaging[0].message.attachments.forEach(attachment => {
@@ -58,7 +56,6 @@ let postWebhook = (req, res) => {
                     }
                 });
             }
-
             console.log(`Sender ID: ${senderId}`);
             console.log(`Message: ${message}`);
             if (imageUrl) {
